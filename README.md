@@ -234,3 +234,164 @@ function MyComponent() {
 }
 ```
 
+## React Server Components
+React Server Components는 React 18 버전에서 도입된 실험적인 기능이다. 이 기능은 서버 사이드에서 React 컴포넌트를 렌더링하고 클라이언트로 전송하는 것을 가능하게 해준다.
+
+### 특징:
+* 즉시 렌더링: 서버 컴포넌트는 서버에서 렌더링되고 결과 HTML이 클라이언트로 전송된다. 이를 통해 초기 페이지 로딩 시간이 단축된다.
+* 데이터 페칭 간소화: 서버 컴포넌트는 데이터를 미리 가져와서 클라이언트로 전송할 수 있기 때문에, 클라이언트에서 복잡한 데이터 페칭 로직을 걱정할 필요가 없어진다.
+* 클라이언트 번들 크기 감소: 서버 컴포넌트는 클라이언트로 전송되지 않기 때문에 클라이언트 사이드의 번들 크기를 줄일 수 있다.
+* 클라이언트와 서버 간의 일관된 코딩 경험: 서버 컴포넌트는 클라이언트 컴포넌트와 매우 유사하다. 따라서, React 개발자는 이미 익숙한 패턴과 기술을 사용하여 서버 컴포넌트를 쉽게 개발할 수 있다.
+
+## 컴포넌트 타입:
+* 서버 컴포넌트(.server.js): 서버에서만 실행되며 결과가 HTML로 직렬화되어 클라이언트로 전송된다.
+* 클라이언트 컴포넌트(.client.js): 클라이언트에서만 실행된다. 동적 인터랙션을 처리하는 데 사용된다.
+* 공유 컴포넌트(.js): 서버와 클라이언트 양쪽에서 사용할 수 있다.
+
+### 예시코드
+```javascript
+// UserData.js
+import { Pool } from 'pg'; 
+
+const pool = new Pool({
+  user: 'dbuser',
+  host: 'database.server.com',
+  database: 'mydatabase',
+  password: 'mypassword',
+  port: 5432,
+});
+
+export async function fetchUserData(userId) {
+  const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+  return rows[0];
+}
+```
+
+```javascript
+// UserDetails.server.js
+import { fetchUserData } from './UserData';
+
+export default function UserDetails({ userId }) {
+  const userData = fetchUserData(userId);
+  return (
+    <div>
+      <h1>{userData.name}</h1>
+      <p>{userData.description}</p>
+    </div>
+  );
+}
+```
+```javascript
+// LikeButton.client.js
+import { useState } from 'react';
+
+export default function LikeButton() {
+  const [liked, setLiked] = useState(false);
+  
+  return (
+    <button onClick={() => setLiked(!liked)}>
+      {liked ? 'Liked' : 'Like'}
+    </button>
+  );
+}
+```
+```javascript
+// App.js
+import UserDetails from './UserDetails.server';
+import LikeButton from './LikeButton.client';
+
+export default function App({ userId }) {
+  return (
+    <div>
+      <UserDetails userId={userId} />
+      <LikeButton />
+    </div>
+  );
+}
+```
+위의 예시에서 UserDetails는 서버 컴포넌트로서 사용자 정보를 서버에서 가져온 후 렌더링한다. LikeButton은 클라이언트 컴포넌트로서 사용자의 인터랙션을 처리한다. App 컴포넌트는 이 두 컴포넌트를 결합하여 전체 페이지를 구성한다.
+
+## New Root API
+React 18에서 도입된 New Root API는 React의 새로운 동시성(concurrency) 모델을 사용하기 위한 핵심 메커니즘이다. 동시성 모델을 통해 여러 개의 작업을 동시에 수행하면서, UI의 반응성을 향상시키는 것이 주요 목적이다. 이를 위해 두 가지 주요 함수, createRoot와 createBlockingRoot가 도입되었다.
+
+### createRoot
+이 함수는 React 18의 동시성 모드를 활성화한다. 동시성 모드는 React의 작업을 비동기적으로 처리하여 애플리케이션의 반응성을 향상시킨다. Suspense, Concurrent Rendering 등의 새로운 기능과 함께 작동한다.
+
+```javascript
+import { createRoot } from 'react-dom';
+import App from './App';
+
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
+```
+위 코드에서 createRoot는 DOM 노드를 인자로 받아 React root를 생성하고, root.render를 사용하여 App 컴포넌트를 렌더링한다. 이를 통해 애플리케이션에서 React의 동시성 기능을 활성화하게 된다.
+
+### createBlockingRoot
+이 함수는 동시성 모드를 비활성화하고, 레거시 모드와 비슷한 동작을 하게 한다. 그러나 React 18의 일부 성능 향상과 새로운 기능을 사용할 수 있다.
+
+```javascript
+import { createBlockingRoot } from 'react-dom';
+import App from './App';
+
+const root = createBlockingRoot(document.getElementById('root'));
+root.render(<App />);
+```
+ 함수는 애플리케이션에서 최신 비동기 기능을 사용하지 않고도 React 18의 일부 새로운 기능과 성능 개선을 제공한다.
+
+## New Hook
+
+### useTransition
+useTransition는 연산 중에 일시적으로 UI 업데이트를 "지연"시키는 데 사용된다. 이를 통해 React는 사용자에게 빠른 응답성을 제공할 수 있다.
+useTransition는 두 가지 값을 반환한다: startTransition 함수와 isPending 상태.
+
+```javascript
+import { useTransition } from 'react';
+
+function App() {
+  const [data, setData] = useState(null);
+  const [startTransition, isPending] = useTransition();
+
+  function handleClick() {
+    startTransition(() => {
+      // 비동기 작업, 예: 데이터 페칭
+      fetchSomething().then(newData => setData(newData));
+    });
+  }
+
+  return (
+    <div>
+      <button onClick={handleClick}>
+        Load Data
+      </button>
+      {isPending ? "Loading..." : data}
+    </div>
+  );
+}
+```
+* startTransition:  함수 내부에서 비동기 작업을 시작한다.
+* isPending은 해당 트랜지션이 진행 중인지 여부를 나타낸다.
+
+### useDeferredValue
+useDeferredValue는 값의 업데이트를 "지연"시키는 데 사용된다. 이는 useTransition과 유사한 목적으로 사용되며, 주로 사용자 입력과 같은 연속적인 업데이트에 유용하다.
+
+```javascript
+import { useState, useDeferredValue } from 'react';
+
+function SearchComponent() {
+  const [inputValue, setInputValue] = useState('');
+  const deferredInputValue = useDeferredValue(inputValue, { timeoutMs: 200 });
+
+  function handleInputChange(event) {
+    setInputValue(event.target.value);
+  }
+
+  return (
+    <div>
+      <input value={inputValue} onChange={handleInputChange} />
+      {/* deferredInputValue는 지연된 값을 사용하여 비동기 작업을 수행 */}
+      <AsyncSearchResults query={deferredInputValue} />
+    </div>
+  );
+}
+```
+* useDeferredValue: 입력 값의 업데이트를 지연시켜 주어, 사용자가 빠르게 타이핑할 때 모든 중간 값에 대해 검색 요청을 보내는 것을 방지한다.
