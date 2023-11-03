@@ -395,3 +395,73 @@ function SearchComponent() {
 }
 ```
 * useDeferredValue: 입력 값의 업데이트를 지연시켜 주어, 사용자가 빠르게 타이핑할 때 모든 중간 값에 대해 검색 요청을 보내는 것을 방지한다.
+
+
+## Streaming SSR
+리액트 18의 Streaming SSR은 서버에서 페이지를 렌더링할 때, 전체 페이지를 렌더링하는 것을 기다리지 않고 조각조각 나누어 스트림으로 전송하는 새로운 방식이다. 이를 통해 사용자는 전체 페이지가 로드될 때까지 기다릴 필요 없이 일부 컨텐츠를 먼저 볼 수 있게 되어 사용자 경험이 크게 개선된다.
+
+### 주요 특징:
+* 1.조각조각 나눠 전송: 전체 페이지를 한 번에 렌더링하는 대신, 조각조각 나눠서 렌더링하고 이를 클라이언트에 전송
+* 2.응답성 향상: 사용자는 애플리케이션이 더 빠르게 로딩되는 것처럼 느낌
+* 3.리소스 효율성: 필요한 데이터만 로드하여 렌더링을 시작하므로 서버 리소스가 효율적으로 사용됨
+
+### 예시코드
+
+```javascript
+//server code
+const express = require('express');
+const { renderToNodeStream } = require('react-dom/server');
+const App = require('./App');
+
+const app = express();
+
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  
+  // React 컴포넌트를 스트림으로 렌더링
+  const stream = renderToNodeStream(<App />);
+  
+  // 스트림 시작
+  res.write('<!DOCTYPE html><html><head><title>Streaming SSR</title></head><body>');
+  stream.pipe(res, { end: false });
+  
+  stream.on('end', () => {
+    res.write('</body></html>');
+    res.end();
+  });
+});
+
+app.listen(3000);
+```
+
+```javascript
+//client code
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+function HeaderComponent() {
+  return <header>Header</header>;
+}
+
+function ContentComponent() {
+  return <main>Content</main>;
+}
+
+function FooterComponent() {
+  return <footer>Footer</footer>;
+}
+
+function App() {
+  return (
+    <div>
+      <HeaderComponent />
+      <ContentComponent />
+      <FooterComponent />
+    </div>
+  );
+}
+
+ReactDOM.hydrate(<App />, document.getElementById('root'));
+```
+위의 예시에서, 서버는 App 컴포넌트를 스트림으로 렌더링하고, 이를 클라이언트에 직접 스트리밍한다. renderToNodeStream 함수는 React 컴포넌트를 Node 스트림으로 렌더링하는 데 사용된다.
+클라이언트 코드의 각 부분(또는 조각)을 더 빨리 스트림 함으로써, 브라우저는 서버에서 보내온 HTML 조각을 더 빨리 렌더링하고 사용자에게 더 빨리 컨텐츠를 보여줄 수 있다.
