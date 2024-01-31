@@ -126,7 +126,7 @@ function MyComponent() {
 React 18에서 도입된 "Concurrent Rendering"은 사용자 경험을 개선하고 애플리케이션의 렌더링 성능을 향상시키기 위한 기능아다. 이 기능은 애플리케이션 UI의 반응성을 향상시키기 위해 작업을 백그라운드에서 수행할 수 있도록 한다. 
 즉, 브라우저가 다른 중요한 작업들(예: 사용자 입력 같은 것)을 처리하는 동안 React는 렌더링 작업을 백그라운드에서 진행할 수 있다.
 
-Concurrent Rendering의 주요 장점은 다음과 같습니다:
+Concurrent Rendering의 주요 장점은 다음과 같다:
 
 * 1.작업 분할: 렌더링 작업을 작은 청크로 나누고, 브라우저가 다른 작업을 수행할 시간을 만든다. 이렇게 함으로써 애플리케이션이 더 반응적으로 느껴진다.
 * 2.우선 순위 설정: React는 어떤 업데이트가 더 중요한지 파악하고, 중요한 업데이트를 먼저 수행한다. 예를 들어, 사용자 입력과 관련된 업데이트는 데이터 패칭과 관련된 업데이트보다 먼저 처리될 수 있다.
@@ -141,21 +141,37 @@ import { startTransition } from 'react';
 
 function MyComponent() {
   const [count, setCount] = useState(0);
+  const [data, setData] = useState(null);
 
   function handleIncrement() {
-    startTransition(() => {
-      setCount(c => c + 1);
+    // 버튼 클릭 이벤트: 우선순위 처리
+    setCount(c => c + 1);
+
+    // 데이터 패칭 후 UI 업데이트: startTransition 사용
+    fetchData().then(response => {
+      startTransition(() => {
+        setData(response);
+      });
     });
+  }
+
+  async function fetchData() {
+    const response = await axios.get();
+    return response;
   }
 
   return (
     <div>
       <p>Count: {count}</p>
       <button onClick={handleIncrement}>Increment</button>
+      <div>Data: {data}</div>
     </div>
   );
 }
+
 ```
+startTransition은 React가 UI 업데이트의 우선순위를 관리할 수 있게 해준다. 긴급하지 않은 업데이트(예: 데이터 패칭 후의 UI 업데이트)는 startTransition 내부에서 처리되어, 긴급한 업데이트(예: 키 입력, 버튼 클릭)가 더 빠르게 처리된다.
+
 
 ### 비동시성 모드 vs 동시성 모드
 비동기적 모드 (전통적인 React 렌더링):<br/>
