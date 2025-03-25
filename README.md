@@ -464,7 +464,6 @@ import App from './App';
 const root = createBlockingRoot(document.getElementById('root'));
 root.render(<App />);
 ```
- 함수는 애플리케이션에서 최신 비동기 기능을 사용하지 않고도 React 18의 일부 새로운 기능과 성능 개선을 제공한다.
 
 ## New Hook
 
