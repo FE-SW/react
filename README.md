@@ -1,6 +1,12 @@
 ## Suspense
-Suspense는 React에서 비동기 작업을 보다 쉽게 처리할 수 있도록 도와주는 기능이다. 주로 데이터 패칭이나 코드 분할을 수행하는 동안 로딩 상태를 관리하는 데 사용된다. Suspense를 사용하면 컴포넌트가 필요한 데이터를 기다리는 동안 로딩 스피너와 같은 대체 콘텐츠를 표시할 수 있다. 이는 사용자 경험을 개선하고, 비동기 작업이 완료될 때까지의 대기 시간을 시각적으로 처리할 수 있게 해준다.
+React에서 비동기 작업을 보다 쉽게 처리할 수 있게 해주는 기능이다. 주로 데이터 패칭이나 코드 분할을 수행하는 동안 로딩 표시와 같은 대체 컨텐츠를 렌더링하는데 사용된다. 이를 통해 앱의 로딩 상태를 세련되게 관리할 수 있다.
+Suspense는 주로 두 가지 주요 경우에 사용된다: 데이터 패칭(Data Fetching)과 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
 
+### 데이터 패칭(Data Fetching)
+React 18의 Suspense는 컴포넌트가 데이터 패칭을 기다리는 동안 "fallback" 컨텐츠를 표시할 수 있도록 해준다. 
+이는 컴포넌트가 필요로 하는 데이터가 준비될 때까지 로딩 인디케이터나 다른 UI 요소를 렌더링 할 수 있음을 의미한다.
+
+예를 들어, 데이터를 패칭하는 중인 컴포넌트가 있고, 해당 데이터가 준비될 때까지 로딩 스피너를 보여주고 싶다면, Suspense를 사용하여 이를 수행할 수 있다.
 ```javascript
 import React, { Suspense } from 'react';
 import { fetchProfileData } from './fakeApi';
@@ -36,6 +42,27 @@ function Spinner() {
   return <div>Loading...</div>;
 }
 ```
+
+### 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
+Suspense는 또한 애플리케이션의 특정 부분을 지연 로딩하고 코드 분할하는데 사용된다. 
+이는 큰 앱의 성능을 향상시키기 위해 특정 섹션 또는 컴포넌트가 필요할 때만 코드를 로드하고자 할 때 유용하다.
+
+React.lazy는 동적 임포트를 사용하여 컴포넌트를 로드한다. 이 컴포넌트들은 초기 로드 시에는 포함되지 않지만, 나중에 필요할 때 로드된다.
+Suspense는 이러한 컴포넌트들이 로드되는 동안 표시될 UI를 지정한다.
+
+```javascript
+import React, { Suspense } from 'react';
+const OtherComponent = React.lazy(() => import('./OtherComponent'));
+
+function MyComponent() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OtherComponent />
+    </Suspense>
+  );
+}
+```
+
 
 ## Error Boundary
 Error Boundary는 React 컴포넌트 트리에서 발생하는 JavaScript 오류를 잡아내어 UI의 특정 부분이 오류로 인해 깨지는 것을 방지한다. Error Boundary는 컴포넌트의 자식에서 발생하는 오류를 잡아내고, 대체 UI를 렌더링할 수 있다. 이는 애플리케이션이 예기치 않은 오류로 인해 전체적으로 중단되는 것을 방지하고, 사용자에게 보다 안정적인 경험을 제공한다.
@@ -338,71 +365,6 @@ startTransition은 React가 UI 업데이트의 우선순위를 관리할 수 있
 * 더 나은 사용자 경험을 제공하면서도 컴포넌트의 업데이트를 더 효율적으로 관리할 수 있다.
 
 동시성 랜더링 도입된 덕분에 리액트18에서는 suspense,서버 랜더링,변이같은 기능이 추가적으로 도입되었다
-
-## Suspense
-React에서 비동기 작업을 보다 쉽게 처리할 수 있게 해주는 기능이다. 주로 데이터 패칭이나 코드 분할을 수행하는 동안 로딩 표시와 같은 대체 컨텐츠를 렌더링하는데 사용된다. 이를 통해 앱의 로딩 상태를 세련되게 관리할 수 있다.
-Suspense는 주로 두 가지 주요 경우에 사용된다: 데이터 패칭(Data Fetching)과 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
-
-### 데이터 패칭(Data Fetching)
-React 18의 Suspense는 컴포넌트가 데이터 패칭을 기다리는 동안 "fallback" 컨텐츠를 표시할 수 있도록 해준다. 
-이는 컴포넌트가 필요로 하는 데이터가 준비될 때까지 로딩 인디케이터나 다른 UI 요소를 렌더링 할 수 있음을 의미한다.
-
-예를 들어, 데이터를 패칭하는 중인 컴포넌트가 있고, 해당 데이터가 준비될 때까지 로딩 스피너를 보여주고 싶다면, Suspense를 사용하여 이를 수행할 수 있다.
-```javascript
-import React, { Suspense } from 'react';
-import { fetchProfileData } from './fakeApi';
-
-const profileData = fetchProfileData();
-
-function ProfilePage() {
-  return (
-    <Suspense fallback={<Spinner />}>
-      <ProfileDetails />
-      <ProfileTimeline />
-    </Suspense>
-  );
-}
-
-function ProfileDetails() {
-  const user = profileData.user.read();
-  return <h1>{user.name}</h1>;
-}
-
-function ProfileTimeline() {
-  const posts = profileData.posts.read();
-  return (
-    <ul>
-      {posts.map(post => (
-        <li key={post.id}>{post.text}</li>
-      ))}
-    </ul>
-  );
-}
-
-function Spinner() {
-  return <div>Loading...</div>;
-}
-```
-
-### 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
-Suspense는 또한 애플리케이션의 특정 부분을 지연 로딩하고 코드 분할하는데 사용된다. 
-이는 큰 앱의 성능을 향상시키기 위해 특정 섹션 또는 컴포넌트가 필요할 때만 코드를 로드하고자 할 때 유용하다.
-
-React.lazy는 동적 임포트를 사용하여 컴포넌트를 로드한다. 이 컴포넌트들은 초기 로드 시에는 포함되지 않지만, 나중에 필요할 때 로드된다.
-Suspense는 이러한 컴포넌트들이 로드되는 동안 표시될 UI를 지정한다.
-
-```javascript
-import React, { Suspense } from 'react';
-const OtherComponent = React.lazy(() => import('./OtherComponent'));
-
-function MyComponent() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <OtherComponent />
-    </Suspense>
-  );
-}
-```
 
 ## React Server Components
 React Server Components는 React 18 버전에서 도입된 실험적인 기능이다. 이 기능은 서버 사이드에서 React 컴포넌트를 렌더링하고 클라이언트로 전송하는 것을 가능하게 해준다.
