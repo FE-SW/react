@@ -565,6 +565,52 @@ function SearchComponent() {
 ```
 * useDeferredValue: 입력 값의 업데이트를 지연시켜 주어, 사용자가 빠르게 타이핑할 때 모든 중간 값에 대해 검색 요청을 보내는 것을 방지한다.
 
+### 4.useImperativeHandle
+React에서 ref를 사용자 정의할 수 있게 해주는 Hook이다. 이 Hook은 주로 부모 컴포넌트가 자식 컴포넌트의 인스턴스에 대해 명령형 접근을 해야 할 때 사용된다. forwardRef와 함께 사용되며, 외부에서 접근 가능한 메서드나 속성을 정의할 수 있다.
+이 Hook은 주로 제3자 라이브러리와의 통합이나, 특정 DOM 조작이 필요한 경우에 유용하다. useImperativeHandle을 사용하면 컴포넌트의 내부 구현을 숨기면서도 외부에서 필요한 기능을 노출할 수 있다.
+
+```javascript
+import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+
+const CustomInput = forwardRef((props, ref) => {
+  const inputRef = useRef();
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current.focus();
+    },
+    clear: () => {
+      inputRef.current.value = '';
+    }
+  }));
+
+  return <input ref={inputRef} {...props} />;
+});
+
+
+function ParentComponent() {
+  const inputRef = useRef();
+
+  const handleFocus = () => {
+    inputRef.current.focus();
+  };
+
+  const handleClear = () => {
+    inputRef.current.clear();
+  };
+
+  return (
+    <div>
+      <CustomInput ref={inputRef} />
+      <button onClick={handleFocus}>Focus Input</button>
+      <button onClick={handleClear}>Clear Input</button>
+    </div>
+  );
+}
+
+export default ParentComponent;
+```
+
 
 ## Streaming SSR
 리액트 18의 Streaming SSR은 서버에서 페이지를 렌더링할 때, 전체 페이지를 렌더링하는 것을 기다리지 않고 조각조각 나누어 스트림으로 전송하는 새로운 방식이다. 이를 통해 사용자는 전체 페이지가 로드될 때까지 기다릴 필요 없이 일부 컨텐츠를 먼저 볼 수 있게 되어 사용자 경험이 크게 개선된다.
@@ -632,3 +678,40 @@ ReactDOM.hydrate(<App />, document.getElementById('root'));
 ```
 위의 예시에서, 서버는 App 컴포넌트를 스트림으로 렌더링하고, 이를 클라이언트에 직접 스트리밍한다. renderToNodeStream 함수는 React 컴포넌트를 Node 스트림으로 렌더링하는 데 사용된다.
 클라이언트 코드의 각 부분(또는 조각)을 더 빨리 스트림 함으로써, 브라우저는 서버에서 보내온 HTML 조각을 더 빨리 렌더링하고 사용자에게 더 빨리 컨텐츠를 보여줄 수 있다.
+
+## forwardRef
+forwardRef는 React에서 부모 컴포넌트가 자식 컴포넌트의 DOM 노드나 클래스 인스턴스에 대한 참조를 전달할 수 있도록 하는 고차 컴포넌트이다.
+기본적으로, React에서는 ref를 함수형 컴포넌트에 직접 전달할 수 없다. forwardRef를 사용하면 함수형 컴포넌트가 ref를 받아서 특정 DOM 요소나 클래스 인스턴스에 연결할 수 있다.
+
+#### 이 기능은 주로 다음과 같은 경우에 유용
+* DOM 조작: 부모 컴포넌트가 자식 컴포넌트의 특정 DOM 요소에 직접 접근해야 할 때.
+* 제3자 라이브러리 통합: 외부 라이브러리와의 통합 시, 특정 DOM 요소에 대한 참조가 필요할 때.
+
+```javascript
+// 아래는 forwardRef를 사용하여 부모 컴포넌트가 자식 컴포넌트의 입력 필드에 직접 접근할 수 있도록 하는 예시
+
+import React, { useRef, forwardRef } from 'react';
+
+// 자식 컴포넌트
+const CustomInput = forwardRef((props, ref) => {
+  return <input ref={ref} {...props} />;
+});
+
+// 부모 컴포넌트
+function ParentComponent() {
+  const inputRef = useRef();
+
+  const handleFocus = () => {
+    inputRef.current.focus();
+  };
+
+  return (
+    <div>
+      <CustomInput ref={inputRef} placeholder="Type here..." />
+      <button onClick={handleFocus}>Focus Input</button>
+    </div>
+  );
+}
+
+export default ParentComponent;
+```
