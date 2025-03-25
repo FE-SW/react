@@ -1,3 +1,157 @@
+## Suspense
+Suspense는 React에서 비동기 작업을 보다 쉽게 처리할 수 있도록 도와주는 기능이다. 주로 데이터 패칭이나 코드 분할을 수행하는 동안 로딩 상태를 관리하는 데 사용된다. Suspense를 사용하면 컴포넌트가 필요한 데이터를 기다리는 동안 로딩 스피너와 같은 대체 콘텐츠를 표시할 수 있다. 이는 사용자 경험을 개선하고, 비동기 작업이 완료될 때까지의 대기 시간을 시각적으로 처리할 수 있게 해준다.
+
+```javascript
+import React, { Suspense } from 'react';
+import { fetchProfileData } from './fakeApi';
+
+const profileData = fetchProfileData();
+
+function ProfilePage() {
+  return (
+    <Suspense fallback={<Spinner />}>
+      <ProfileDetails />
+      <ProfileTimeline />
+    </Suspense>
+  );
+}
+
+function ProfileDetails() {
+  const user = profileData.user.read();
+  return <h1>{user.name}</h1>;
+}
+
+function ProfileTimeline() {
+  const posts = profileData.posts.read();
+  return (
+    <ul>
+      {posts.map(post => (
+        <li key={post.id}>{post.text}</li>
+      ))}
+    </ul>
+  );
+}
+
+function Spinner() {
+  return <div>Loading...</div>;
+}
+```
+
+## Error Boundary
+Error Boundary는 React 컴포넌트 트리에서 발생하는 JavaScript 오류를 잡아내어 UI의 특정 부분이 오류로 인해 깨지는 것을 방지한다. Error Boundary는 컴포넌트의 자식에서 발생하는 오류를 잡아내고, 대체 UI를 렌더링할 수 있다. 이는 애플리케이션이 예기치 않은 오류로 인해 전체적으로 중단되는 것을 방지하고, 사용자에게 보다 안정적인 경험을 제공한다.
+
+```javascript
+import React from 'react';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught by ErrorBoundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+
+    return this.props.children; 
+  }
+}
+
+function BuggyComponent() {
+  throw new Error("I crashed!");
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <BuggyComponent />
+    </ErrorBoundary>
+  );
+}
+```
+
+## Code Splitting
+Code Splitting은 애플리케이션의 성능을 최적화하기 위해 코드의 일부를 분할하여 필요할 때만 로드하는 기법이다. React에서는 React.lazy와 Suspense를 사용하여 코드 분할을 쉽게 구현할 수 있다. 이 방법은 초기 로딩 시간을 줄이고, 사용자가 특정 기능을 요청할 때만 관련 코드를 로드하여 네트워크 사용량을 최적화할 수 있다. Code Splitting은 특히 대규모 애플리케이션에서 유용하며, 사용자가 필요로 하지 않는 코드를 미리 로드하지 않도록 하여 성능을 향상시킨다.
+
+```javascript
+import React, { Suspense } from 'react';
+const OtherComponent = React.lazy(() => import('./OtherComponent'));
+
+function MyComponent() {
+  return (
+    <div>
+      <h1>Welcome to My App</h1>
+      {/* Suspense를 사용하여 로딩 중에 표시할 UI를 정의 */}
+      <Suspense fallback={<div>Loading...</div>}>
+        <OtherComponent />
+      </Suspense>
+    </div>
+  );
+}
+
+export default MyComponent;
+```
+
+### API Fetch 오류 처리
+Error Boundary는 렌더링 중 발생하는 오류를 처리하지만, 비동기 작업(예: API 요청)에서 발생하는 오류는 처리하지 않는다. API 요청에서 발생하는 오류는 명령형 코드에서 발생하므로, try/catch 또는 .catch() 메서드를 사용하여 처리해야 한다.
+
+### 클래스형 컴포넌트로 구현해야 하는 이유
+Error Boundary는 componentDidCatch와 같은 라이프사이클 메서드를 필요로 한다. 이 메서드는 컴포넌트의 자식에서 발생하는 오류를 감지하고 처리하는 데 사용된다. 현재 React에서는 이러한 라이프사이클 메서드를 함수형 컴포넌트에서 직접 사용할 수 없기 때문에, Error Boundary는 클래스형 컴포넌트로 구현해야 한다.
+
+### react-error-boundary
+react-error-boundary 라이브러리는 Error Boundary를 더욱 쉽게 설정하고 사용할 수 있도록 도와주는 유틸리티 라이브러이다. 이 라이브러리를 사용하면 함수형 컴포넌트에서도 Error Boundary의 기능을 쉽게 구현할 수 있다.
+
+```javascript 
+import React, { useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+}
+
+function BuggyComponent({ resetKey }) {
+  if (resetKey === 1) {
+    throw new Error("I crashed!");
+  }
+  return <div>Component is working fine.</div>;
+}
+
+function App() {
+  const [resetKey, setResetKey] = useState(0);
+
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={() => {
+        // Reset the state of your app so the error doesn't happen again
+        setResetKey(prevKey => prevKey + 1);
+      }}
+      resetKeys={[resetKey]}
+    >
+      <BuggyComponent resetKey={resetKey} />
+    </ErrorBoundary>
+  );
+}
+
+export default App;
+```
+
+
 ## Automatic Batching
 React 17과 React 18은 상태 업데이트 방식에서 주요 차이점이 있다. React 17 이전의 버전에서는 이벤트 핸들러 내에서 발생한 여러 상태 업데이트가 자동으로 일괄 처리(batch)되었다. 
 그러나, 비동기 코드 또는 프로미스 내에서의 상태 업데이트는 일괄 처리되지 않는다. 반면, React 18에서는 이벤트 핸들러 내의 상태 업데이트뿐만 아니라 비동기 코드 내의 상태 업데이트도 일괄 처리한다.
