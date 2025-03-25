@@ -2,9 +2,9 @@
 React에서 비동기 작업을 보다 쉽게 처리할 수 있게 해주는 기능이다. 주로 데이터 패칭이나 코드 분할을 수행하는 동안 로딩 표시와 같은 대체 컨텐츠를 렌더링하는데 사용된다. 이를 통해 앱의 로딩 상태를 세련되게 관리할 수 있다.
 Suspense는 주로 두 가지 주요 경우에 사용된다: 데이터 패칭(Data Fetching)과 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
 
-### 데이터 패칭(Data Fetching)
+### 1.데이터 패칭(Data Fetching)
 React 18의 Suspense는 컴포넌트가 데이터 패칭을 기다리는 동안 "fallback" 컨텐츠를 표시할 수 있도록 해준다. 
-이는 컴포넌트가 필요로 하는 데이터가 준비될 때까지 로딩 인디케이터나 다른 UI 요소를 렌더링 할 수 있음을 의미한다.
+이는 컴포넌트가 필요로 하는 데이터가 준비될 때까지 로딩 스피너나 다른 UI 요소를 렌더링 할 수 있음을 의미한다.
 
 예를 들어, 데이터를 패칭하는 중인 컴포넌트가 있고, 해당 데이터가 준비될 때까지 로딩 스피너를 보여주고 싶다면, Suspense를 사용하여 이를 수행할 수 있다.
 ```javascript
@@ -43,7 +43,7 @@ function Spinner() {
 }
 ```
 
-### 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
+### 2.코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
 Suspense는 또한 애플리케이션의 특정 부분을 지연 로딩하고 코드 분할하는데 사용된다. 
 이는 큰 앱의 성능을 향상시키기 위해 특정 섹션 또는 컴포넌트가 필요할 때만 코드를 로드하고자 할 때 유용하다.
 
@@ -472,6 +472,44 @@ root.render(<App />);
 
 ## New Hook
 
+### useLayoutEffect
+useLayoutEffect는 React에서 DOM 변형 후에 동기적으로 실행되는 Hook이다. 이 Hook은 DOM에서 레이아웃을 읽고 동기적으로 다시 렌더링해야 할 때 사용된다. 모든 DOM 변경이 완료된 후에 실행되며, 브라우저가 화면을 그리기 전에 실행된다. 이는 useEffect와의 주요 차이점이다.
+
+```javascript
+import React, { useState, useRef, useLayoutEffect } from 'react';
+
+function LayoutEffectExample() {
+  const [height, setHeight] = useState(0);
+  const divRef = useRef(null);
+
+  useLayoutEffect(() => {
+    // DOM 요소의 높이를 측정
+    const measuredHeight = divRef.current.getBoundingClientRect().height;
+    setHeight(measuredHeight);
+  }, []); 
+
+  return (
+    <div>
+      <div ref={divRef} style={{ backgroundColor: 'lightblue', padding: '20px' }}>
+        <p>This is a paragraph inside a div.</p>
+      </div>
+      <p>The height of the above div is: {height}px</p>
+    </div>
+  );
+}
+
+export default LayoutEffectExample;
+```
+
+#### useEffect 차이점
+
+| Feature | useEffect | useLayoutEffect |
+|--------------------|------------------------------------------------|------------------------------------------------|
+| 실행 시점 | 브라우저가 화면을 그린 후 비동기적으로 실행 | DOM 변형 후, 브라우저가 화면을 그리기 전에 동기적으로 실행 |
+| 주 사용 사례 | 비동기 데이터 패칭, 이벤트 리스너 등록 등 | DOM 측정 및 동기적 업데이트 필요 시 |
+| 성능 영향 | 화면 그리기 후 실행되어 성능에 덜 민감 | 화면 그리기 전에 실행되어 성능에 민감 |
+
+
 ### useTransition
 useTransition는 연산 중에 일시적으로 UI 업데이트를 "지연"시키는 데 사용된다. 이를 통해 React는 사용자에게 빠른 응답성을 제공할 수 있다.
 useTransition는 두 가지 값을 반환한다: startTransition 함수와 isPending 상태.
@@ -536,8 +574,6 @@ function SearchComponent() {
 * 1.조각조각 나눠 전송: 전체 페이지를 한 번에 렌더링하는 대신, 조각조각 나눠서 렌더링하고 이를 클라이언트에 전송
 * 2.응답성 향상: 사용자는 애플리케이션이 더 빠르게 로딩되는 것처럼 느낌
 * 3.리소스 효율성: 필요한 데이터만 로드하여 렌더링을 시작하므로 서버 리소스가 효율적으로 사용됨
-
-### 예시코드
 
 ```javascript
 //server code
