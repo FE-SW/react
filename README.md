@@ -2,7 +2,7 @@
 React에서 비동기 작업을 보다 쉽게 처리할 수 있게 해주는 기능이다. 주로 데이터 패칭이나 코드 분할을 수행하는 동안 로딩 표시와 같은 대체 컨텐츠를 렌더링하는데 사용된다. 이를 통해 앱의 로딩 상태를 세련되게 관리할 수 있다.
 Suspense는 주로 두 가지 주요 경우에 사용된다: 데이터 패칭(Data Fetching)과 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
 
-### 1.데이터 패칭(Data Fetching)
+#### 1.데이터 패칭(Data Fetching)
 React 18의 Suspense는 컴포넌트가 데이터 패칭을 기다리는 동안 "fallback" 컨텐츠를 표시할 수 있도록 해준다. 
 이는 컴포넌트가 필요로 하는 데이터가 준비될 때까지 로딩 스피너나 다른 UI 요소를 렌더링 할 수 있음을 의미한다.
 
@@ -43,7 +43,7 @@ function Spinner() {
 }
 ```
 
-### 2.코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
+#### 2.코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
 Suspense는 또한 애플리케이션의 특정 부분을 지연 로딩하고 코드 분할하는데 사용된다. 
 이는 큰 앱의 성능을 향상시키기 위해 특정 섹션 또는 컴포넌트가 필요할 때만 코드를 로드하고자 할 때 유용하다.
 
@@ -128,13 +128,13 @@ function MyComponent() {
 export default MyComponent;
 ```
 
-### API Fetch 오류 처리
+#### API Fetch 오류 처리
 Error Boundary는 렌더링 중 발생하는 오류를 처리하지만, 비동기 작업(예: API 요청)에서 발생하는 오류는 처리하지 않는다. API 요청에서 발생하는 오류는 명령형 코드에서 발생하므로, try/catch 또는 .catch() 메서드를 사용하여 처리해야 한다.
 
-### 클래스형 컴포넌트로 구현해야 하는 이유
+#### 클래스형 컴포넌트로 구현해야 하는 이유
 Error Boundary는 componentDidCatch와 같은 라이프사이클 메서드를 필요로 한다. 이 메서드는 컴포넌트의 자식에서 발생하는 오류를 감지하고 처리하는 데 사용된다. 현재 React에서는 이러한 라이프사이클 메서드를 함수형 컴포넌트에서 직접 사용할 수 없기 때문에, Error Boundary는 클래스형 컴포넌트로 구현해야 한다.
 
-### react-error-boundary
+#### react-error-boundary
 react-error-boundary 라이브러리는 Error Boundary를 더욱 쉽게 설정하고 사용할 수 있도록 도와주는 유틸리티 라이브러이다. 이 라이브러리를 사용하면 함수형 컴포넌트에서도 Error Boundary의 기능을 쉽게 구현할 수 있다.
 
 ```javascript 
@@ -183,7 +183,7 @@ export default App;
 React 17과 React 18은 상태 업데이트 방식에서 주요 차이점이 있다. React 17 이전의 버전에서는 이벤트 핸들러 내에서 발생한 여러 상태 업데이트가 자동으로 일괄 처리(batch)되었다. 
 그러나, 비동기 코드 또는 프로미스 내에서의 상태 업데이트는 일괄 처리되지 않는다. 반면, React 18에서는 이벤트 핸들러 내의 상태 업데이트뿐만 아니라 비동기 코드 내의 상태 업데이트도 일괄 처리한다.
 
-### 이벤트 핸들러 내부에서 여러개 상태 업데이트 
+#### 1.이벤트 핸들러 내부에서 여러개 상태 업데이트 
 
 ```javascript
 import React, { useState } from 'react';
@@ -210,7 +210,7 @@ function MultipleStateUpdates() {
 * React 17: 여러 상태 업데이트가 자동으로 일괄 처리되어, DOM 렌더링은 한 번만 발생한다.
 * React 18: React 17과 동일하게 동작한다.
 
-### 이벤트 핸들러 내부 비동기 코드에서 여러개 상태 업데이트
+#### 2.이벤트 핸들러 내부 비동기 코드에서 여러개 상태 업데이트
 
 ```javascript
 import React, { useState } from 'react';
@@ -380,7 +380,6 @@ React Server Components는 React 18 버전에서 도입된 실험적인 기능�
 * 클라이언트 컴포넌트(.client.js): 클라이언트에서만 실행된다. 동적 인터랙션을 처리하는 데 사용된다.
 * 공유 컴포넌트(.js): 서버와 클라이언트 양쪽에서 사용할 수 있다.
 
-### 예시코드
 ```javascript
 // UserData.js
 import { Pool } from 'pg'; 
@@ -446,7 +445,7 @@ export default function App({ userId }) {
 ## New Root API
 React 18에서 도입된 New Root API는 React의 새로운 동시성(concurrency) 모델을 사용하기 위한 핵심 메커니즘이다. 동시성 모델을 통해 여러 개의 작업을 동시에 수행하면서, UI의 반응성을 향상시키는 것이 주요 목적이다. 이를 위해 두 가지 주요 함수, createRoot와 createBlockingRoot가 도입되었다.
 
-### createRoot
+### 1.createRoot
 이 함수는 React 18의 동시성 모드를 활성화한다. 동시성 모드는 React의 작업을 비동기적으로 처리하여 애플리케이션의 반응성을 향상시킨다. Suspense, Concurrent Rendering 등의 새로운 기능과 함께 작동한다.
 
 ```javascript
@@ -458,7 +457,7 @@ root.render(<App />);
 ```
 위 코드에서 createRoot는 DOM 노드를 인자로 받아 React root를 생성하고, root.render를 사용하여 App 컴포넌트를 렌더링한다. 이를 통해 애플리케이션에서 React의 동시성 기능을 활성화하게 된다.
 
-### createBlockingRoot
+### 2.createBlockingRoot
 이 함수는 동시성 모드를 비활성화하고, 레거시 모드와 비슷한 동작을 하게 한다. 그러나 React 18의 일부 성능 향상과 새로운 기능을 사용할 수 있다.
 
 ```javascript
@@ -472,7 +471,7 @@ root.render(<App />);
 
 ## New Hook
 
-### useLayoutEffect
+### 1.useLayoutEffect
 useLayoutEffect는 React에서 DOM 변형 후에 동기적으로 실행되는 Hook이다. 이 Hook은 DOM에서 레이아웃을 읽고 동기적으로 다시 렌더링해야 할 때 사용된다. 모든 DOM 변경이 완료된 후에 실행되며, 브라우저가 화면을 그리기 전에 실행된다. 이는 useEffect와의 주요 차이점이다.
 
 ```javascript
@@ -510,7 +509,7 @@ export default LayoutEffectExample;
 | 성능 영향 | 화면 그리기 후 실행되어 성능에 덜 민감 | 화면 그리기 전에 실행되어 성능에 민감 |
 
 
-### useTransition
+### 2.useTransition
 useTransition는 연산 중에 일시적으로 UI 업데이트를 "지연"시키는 데 사용된다. 이를 통해 React는 사용자에게 빠른 응답성을 제공할 수 있다.
 useTransition는 두 가지 값을 반환한다: startTransition 함수와 isPending 상태.
 
@@ -541,7 +540,7 @@ function App() {
 * startTransition:  함수 내부에서 비동기 작업을 시작한다.
 * isPending은 해당 트랜지션이 진행 중인지 여부를 나타낸다.
 
-### useDeferredValue
+### 3.useDeferredValue
 useDeferredValue는 값의 업데이트를 "지연"시키는 데 사용된다. 이는 useTransition과 유사한 목적으로 사용되며, 주로 사용자 입력과 같은 연속적인 업데이트에 유용하다.
 
 ```javascript
