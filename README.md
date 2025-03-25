@@ -128,13 +128,13 @@ function MyComponent() {
 export default MyComponent;
 ```
 
-#### API Fetch 오류 처리
+#### 1.API Fetch 오류 처리
 Error Boundary는 렌더링 중 발생하는 오류를 처리하지만, 비동기 작업(예: API 요청)에서 발생하는 오류는 처리하지 않는다. API 요청에서 발생하는 오류는 명령형 코드에서 발생하므로, try/catch 또는 .catch() 메서드를 사용하여 처리해야 한다.
 
-#### 클래스형 컴포넌트로 구현해야 하는 이유
+#### 2.클래스형 컴포넌트로 구현해야 하는 이유
 Error Boundary는 componentDidCatch와 같은 라이프사이클 메서드를 필요로 한다. 이 메서드는 컴포넌트의 자식에서 발생하는 오류를 감지하고 처리하는 데 사용된다. 현재 React에서는 이러한 라이프사이클 메서드를 함수형 컴포넌트에서 직접 사용할 수 없기 때문에, Error Boundary는 클래스형 컴포넌트로 구현해야 한다.
 
-#### react-error-boundary
+#### 3.react-error-boundary
 react-error-boundary 라이브러리는 Error Boundary를 더욱 쉽게 설정하고 사용할 수 있도록 도와주는 유틸리티 라이브러이다. 이 라이브러리를 사용하면 함수형 컴포넌트에서도 Error Boundary의 기능을 쉽게 구현할 수 있다.
 
 ```javascript 
