@@ -1,3 +1,49 @@
+## SyntheticEvent
+합성 이벤트(SyntheticEvent)는 브라우저의 네이티브 이벤트를 추상화하여 리액트에서 일관되게 처리할 수 있도록 만든 객체이다. 다양한 브라우저에서 발생하는 이벤트 핸들링의 차이를 숨기고, React 컴포넌트에서 동일한 방식으로 이벤트를 처리할 수 있도록 도와준다.
+이를 통해 개발자는 브라우저 간의 차이를 신경 쓰지 않고, 일관된 방식으로 이벤트를 처리할 수 있습니다.
+
+#### 1. 크로스 브라우저 호환성
+SyntheticEvent는 다양한 브라우저에서 동일한 인터페이스를 제공하여, 개발자가 브라우저 간의 차이를 신경 쓰지 않고 일관된 방식으로 이벤트를 처리할 수 있게 한다. 이는 이벤트 핸들링을 단순화하고, 코드의 이식성을 높인다.
+
+예를 들어, 클릭 이벤트를 처리할 때 SyntheticEvent를 사용하면, 모든 브라우저에서 동일한 방식으로 이벤트 객체에 접근할 수 있다.
+
+```javascript
+import React from 'react';
+
+function MyButton() {
+  const handleClick = (event) => {
+    console.log(event.type); // "click"
+    event.preventDefault(); // 기본 동작 방지
+  };
+
+  return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+#### 2. 성능 최적화 및 이벤트 풀링(Event Pooling)
+SyntheticEvent는 이벤트 핸들러를 전역적으로 하나의 이벤트 리스너에 바인딩하여 성능을 최적화합니다. 또한, 이벤트 객체를 재사용하기 위해 이벤트 풀링을 사용한다. 이는 메모리 사용을 줄이고 성능을 향상시키는 데 도움을 줍니다.
+이벤트 핸들러가 호출된 후, 이벤트 객체의 모든 속성은 `null`로 설정된다. 만약 이벤트 객체를 비동기적으로 사용해야 한다면, `event.persist()` 메서드를 호출하여 이벤트 객체가 풀링되지 않도록 할 수 있다.
+
+```javascript
+import React from 'react';
+
+function MyComponent() {
+  const handleClick = (event) => {
+    event.persist(); // 이벤트 객체가 풀링되지 않도록 함
+    setTimeout(() => {
+      console.log(event.type); // "click"
+    }, 1000);
+  };
+
+  return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+SyntheticEvent는 React의 이벤트 시스템을 효율적으로 관리하고, 다양한 브라우저 환경에서 일관된 이벤트 처리를 가능하게 한다. 이를 통해 개발자는 복잡한 이벤트 핸들링 로직을 단순화하고, 성능을 최적화할 수 있다.
+
+
+
+
 ## Suspense
 React에서 비동기 작업을 보다 쉽게 처리할 수 있게 해주는 기능이다. 주로 데이터 패칭이나 코드 분할을 수행하는 동안 로딩 표시와 같은 대체 컨텐츠를 렌더링하는데 사용된다. 이를 통해 앱의 로딩 상태를 세련되게 관리할 수 있다.
 Suspense는 주로 두 가지 주요 경우에 사용된다: 데이터 패칭(Data Fetching)과 코드 분할 및 지연 로딩(Code Splitting & Lazy Loading)
