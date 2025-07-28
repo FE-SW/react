@@ -194,28 +194,6 @@ function App() {
 }
 ```
 
-## Code Splitting
-Code Splitting은 애플리케이션의 성능을 최적화하기 위해 코드의 일부를 분할하여 필요할 때만 로드하는 기법이다. React에서는 React.lazy와 Suspense를 사용하여 코드 분할을 쉽게 구현할 수 있다. 이 방법은 초기 로딩 시간을 줄이고, 사용자가 특정 기능을 요청할 때만 관련 코드를 로드하여 네트워크 사용량을 최적화할 수 있다. Code Splitting은 특히 대규모 애플리케이션에서 유용하며, 사용자가 필요로 하지 않는 코드를 미리 로드하지 않도록 하여 성능을 향상시킨다.
-
-```javascript
-import React, { Suspense } from 'react';
-const OtherComponent = React.lazy(() => import('./OtherComponent'));
-
-function MyComponent() {
-  return (
-    <div>
-      <h1>Welcome to My App</h1>
-      {/* Suspense를 사용하여 로딩 중에 표시할 UI를 정의 */}
-      <Suspense fallback={<div>Loading...</div>}>
-        <OtherComponent />
-      </Suspense>
-    </div>
-  );
-}
-
-export default MyComponent;
-```
-
 #### 1.API Fetch 오류 처리
 Error Boundary는 렌더링 중 발생하는 오류를 처리하지만, 비동기 작업(예: API 요청)에서 발생하는 오류는 처리하지 않는다. API 요청에서 발생하는 오류는 명령형 코드에서 발생하므로, try/catch 또는 .catch() 메서드를 사용하여 처리해야 한다.
 
